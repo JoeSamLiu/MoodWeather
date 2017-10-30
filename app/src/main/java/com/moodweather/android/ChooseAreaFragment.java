@@ -5,7 +5,6 @@ import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -155,7 +154,6 @@ public class ChooseAreaFragment extends Fragment {
         backButton.setVisibility(View.VISIBLE);
         cityList = DataSupport.where("provinceid = ? ",
                 String.valueOf(selectedProvince.getId())).find(City.class);
-        Log.d("ChooseAreaFragment","执行了queryCities()");
         if (cityList.size() > 0) {
             dataList.clear();
             for (City city : cityList) {
@@ -190,7 +188,6 @@ public class ChooseAreaFragment extends Fragment {
             int provinceCode = selectedProvince.getProvinceCode();
             int cityCode = selectedCity.getCityCode();
             String address = "http://guolin.tech/api/china/" + provinceCode+ "/" + cityCode;
-            Log.d("ChooseAreaFragment",address);
             queryFromServer(address, "county");
         }
     }
