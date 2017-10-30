@@ -101,10 +101,17 @@ public class ChooseAreaFragment extends Fragment {
                 //从省市县列表界面跳转至天气界面
                 else if(currentLevel == LEVEL_COUNTY){
                     String weatherId = countyList.get(position).getWeatherId();
-                    Intent intent = new Intent(getActivity() , WeatherActivity.class);
-                    intent.putExtra("weather_id" , weatherId);
-                    startActivity(intent);
-                    getActivity().finish();
+                    if (getActivity()instanceof  MainActivity) {
+                        Intent intent = new Intent(getActivity(), WeatherActivity.class);
+                        intent.putExtra("weather_id", weatherId);
+                        startActivity(intent);
+                        getActivity().finish();
+                    }else if (getActivity()instanceof WeatherActivity){
+                        WeatherActivity activity = (WeatherActivity) getActivity();
+                        activity.swipeRefreshLayout.setRefreshing(true);
+                        activity.requestWeather(weatherId);
+                        activity.drawerLayout.closeDrawers();
+                    }
                 }
             }
         });

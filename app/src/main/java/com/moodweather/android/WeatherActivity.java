@@ -6,10 +6,14 @@ import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
@@ -72,6 +76,18 @@ public class WeatherActivity extends AppCompatActivity {
      * 用于显示动态背景
      */
     private ImageView bingPicImg;
+    /**
+     * 用于下拉更新
+     */
+    public SwipeRefreshLayout swipeRefreshLayout;
+    /**
+     * 用于滑出菜单的布局
+     */
+    public DrawerLayout drawerLayout;
+    /**
+     * 用于弹出菜单的按钮
+     */
+    private Button navButton;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -99,36 +115,43 @@ public class WeatherActivity extends AppCompatActivity {
         comfortText = (TextView)findViewById(R.id.comfort_text);
         carWashText = (TextView)findViewById(R.id.car_wash_text);
         sportText = (TextView)findViewById(R.id.sport_text);
+        swipeRefreshLayout = (SwipeRefreshLayout)findViewById(R.id.swipe_refresh);
+        swipeRefreshLayout.setColorSchemeResources(R.color.colorPrimary);//设置下拉进度条的颜色
+        drawerLayout = (DrawerLayout)findViewById(R.id.drawer_layout);
+        navButton = (Button)findViewById(R.id.nav_button);
+        navButton.setOnClickListener(new Button.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                drawerLayout.openDrawer(GravityCompat.START);
+            }
+        });
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         String weatherSting = sharedPreferences.getString("weather", null);
-        Log.d("WeatherActivity","weatherString is "+weatherSting);
+        final String weatherId;
         if (weatherSting != null){
             //有缓存时直接解析天气数据
-            Log.d("WeatherActivity","使用了缓存");
-            SharedPreferences userSettings = getSharedPreferences("setting",0);
-            SharedPreferences.Editor editor = userSettings.edit();
-            editor.clear();
-            editor.commit();
             Weather weather = Utility.handleWeatherResponse(weatherSting);
-            Log.d("WeatherActivity","A01weather.aqi is "+weather.aqi);
+            weatherId = weather.basic.weatherId;
             showWeatherInfo(weather);
         }else {
             //无缓存时直接去服务器查询天气
-            Log.d("WeatherActivity","直接访问服务器");
-            String weatherId = getIntent().getStringExtra("weather_id");
+            weatherId = getIntent().getStringExtra("weather_id");
             weatherLayout.setVisibility(View.INVISIBLE);
             requestWeather(weatherId);
         }
-
+        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                requestWeather(weatherId);
+            }
+        });
         String bingPic = sharedPreferences.getString("bing_pic",null);
         if (bingPic != null){
             //有缓存直接读取背景
             Glide.with(this).load(bingPic).into(bingPicImg);
-            Log.d("WeatherActivity","缓存取背景"+bingPicImg.toString());
         }else {
             //无缓存直接去服务器加载
             loadBingPic();
-            Log.d("WeatherActivity","服务器取背景"+bingPicImg.toString());
         }
     }
 
@@ -136,19 +159,16 @@ public class WeatherActivity extends AppCompatActivity {
      * 加载必应每日一图
      */
     private void loadBingPic() {
-        Log.d("WeatherActivity","执行了loadBingPic()");
         String requestBingPic = "http://guolin.tech/api/bing_pic";//必应每日一图接口地址
         HttpUtil.sendOkHttpRequest(requestBingPic, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
                 e.printStackTrace();
-                Log.d("WeatherActivity","执行了onFailure()");
             }
 
             @Override
             public void onResponse(Call call, Response response) throws IOException {
                 final String bingPic = response.body().string();
-                Log.d("WeatherActivity","执行了onResponse()");
                 SharedPreferences.Editor editor = PreferenceManager
                         .getDefaultSharedPreferences(WeatherActivity.this).edit();
                 editor.putString("bing_pic" , bingPic);
@@ -157,7 +177,6 @@ public class WeatherActivity extends AppCompatActivity {
                     @Override
                     public void run() {
                         Glide.with(WeatherActivity.this).load(bingPic).into(bingPicImg);
-                        Log.d("WeatherActivity","执行了onResponse().run");
                     }
                 });
             }
@@ -168,7 +187,7 @@ public class WeatherActivity extends AppCompatActivity {
      * 根据城市id请求城市天气信息
      * @param weatherId
      */
-    private void requestWeather(final String weatherId) {
+    public void requestWeather(final String weatherId) {
         String weatherUrl = "http://guolin.tech/api/weather?cityid="+weatherId
                 +"&key=9bff2107c1bd4be8b5ba7224ea82d82f";
         Log.d("WeatherActivity","weatherUrl is "+weatherUrl+"\nweatherId is "+weatherId);
@@ -181,6 +200,7 @@ public class WeatherActivity extends AppCompatActivity {
                     public void run() {
                         Toast.makeText(WeatherActivity.this ,
                                 "获取天气信息失败" , Toast.LENGTH_SHORT).show();
+                        swipeRefreshLayout.setRefreshing(false);
                     }
                 });
             }
@@ -202,6 +222,7 @@ public class WeatherActivity extends AppCompatActivity {
                             Toast.makeText(WeatherActivity.this ,
                                     "获取天气信息失败" , Toast.LENGTH_SHORT).show();
                         }
+                        swipeRefreshLayout.setRefreshing(false);
                     }
                 });
             }
