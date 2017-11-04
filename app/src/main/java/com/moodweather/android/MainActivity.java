@@ -4,11 +4,11 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 
-public class MainActivity extends AppCompatActivity {
+import com.moodweather.android.util.LogUtil;
 
+public class MainActivity extends BasicActivity {
+    public static final String TAG = "ManiActivity" ;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -16,7 +16,7 @@ public class MainActivity extends AppCompatActivity {
         //缓存数据的判断
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         if (sharedPreferences.getString("weather",null) != null) {
-            Log.d("WeatherActivity","Cache is "+sharedPreferences.getString("weather",null));
+            LogUtil.i(TAG,"主活动的Cache is "+sharedPreferences.getString("weather",null));
             Intent intent = new Intent(this, WeatherActivity.class);
             startActivity(intent);
             finish();

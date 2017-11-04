@@ -12,6 +12,7 @@ import android.util.Log;
 
 import com.moodweather.android.gson.Weather;
 import com.moodweather.android.util.HttpUtil;
+import com.moodweather.android.util.LogUtil;
 import com.moodweather.android.util.Utility;
 
 import java.io.IOException;
@@ -21,7 +22,7 @@ import okhttp3.Callback;
 import okhttp3.Response;
 
 public class AutoUpdateService extends Service {
-
+    public static final String TAG = "AutoUpdateService" ;
     @Override
     public IBinder onBind(Intent intent) {
         // TODO: Return the communication channel to the service.
@@ -30,6 +31,7 @@ public class AutoUpdateService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        LogUtil.i(TAG,"后台服务启动了，而且是私自启动！！");
         updateWeather();
         updateBingPic();
         AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);

@@ -26,6 +26,8 @@
         android:scrollbars="none"
         android:overScrollMode="never">
         <LinearLayout
+            android:id="@+id/weather_touch"
+            android:clickable="true"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
@@ -46,4 +48,12 @@
             android:name="com.moodweather.android.ChooseAreaFragment"
             android:layout_gravity="start"/>
     </android.support.v4.widget.DrawerLayout>
+    <TextView
+        android:id="@+id/title_update_time"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="0dp"
+        android:textColor="#fff"
+        android:textSize="16sp"
+        android:text="00:00"/>
 </FrameLayout>
