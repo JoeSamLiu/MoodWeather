@@ -1,6 +1,7 @@
 package com.moodweather.android;
 
 import android.Manifest;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
@@ -9,6 +10,7 @@ import android.widget.Toast;
 import com.baidu.location.BDLocation;
 import com.baidu.location.BDLocationListener;
 import com.baidu.location.LocationClient;
+import com.moodweather.android.introduce.CenterActivity;
 import com.moodweather.android.util.LogUtil;
 
 import java.util.ArrayList;
@@ -32,6 +34,8 @@ public class MainActivity extends BasicActivity {
     private void judgeFirst(boolean isFirst) {
         if (!isFirst){
             LogUtil.i(TAG,"第一次执行程序");
+            Intent intent = new Intent(this , CenterActivity.class);
+            startActivity(intent);
             initialization();//初始化
             askForPermission();//询问权限
             this.isFirst = true;

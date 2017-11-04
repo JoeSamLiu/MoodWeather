@@ -49,6 +49,8 @@
             android:theme="@style/AppTheme">
         </activity>
 
+        <activity android:name=".introduce.CenterActivity"/>
+        <activity android:name=".BasicActivity"/>
         <service android:name=".service.AutoUpdateService"/>
         <service
             android:name="com.baidu.location.f"

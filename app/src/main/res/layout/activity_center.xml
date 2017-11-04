@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/colorPrimary">
+
+    <LinearLayout
+        android:id="@+id/ll_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:paddingTop="144dp"
+        tools:ignore="HardcodedText"
+        tools:targetApi="LOLLIPOP">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="16dp"
+            android:alpha="0"
+            android:text="This is my 1st App"
+            android:textColor="@android:color/white"
+            android:textSize="22sp"
+            tools:alpha="1"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="8dp"
+            android:alpha="0"
+            android:text="My name is Thomas"
+            android:textColor="@android:color/white"
+            android:textSize="20sp"
+            tools:alpha="1"/>
+
+        <Button
+            android:id="@+id/b_choice_1"
+            android:layout_width="200dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="48dp"
+            android:background="@drawable/oval"
+            android:scaleX="0"
+            android:scaleY="0"
+            android:text="心情天气"
+            android:textColor="#0f0faa"
+            android:textSize="16sp"
+            tools:scaleX="1"
+            tools:scaleY="1"/>
+
+        <Button
+            android:id="@+id/b_choice_2"
+            android:layout_width="200dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:background="@drawable/round_angle1"
+            android:scaleX="0"
+            android:scaleY="0"
+            android:text="开始体验"
+            android:textSize="16sp"
+            android:textColor="@android:color/white"
+            tools:scaleX="1"
+            tools:scaleY="1"/>
+
+    </LinearLayout>
+
+    <ImageView
+        android:id="@+id/iv_logo"
+        android:layout_width="120dp"
+        android:layout_height="120dp"
+        android:layout_gravity="center"
+        android:layout_marginTop="12dp"
+        android:contentDescription="@null"
+        android:src="@drawable/ic_logo"/>
+
+</FrameLayout>
