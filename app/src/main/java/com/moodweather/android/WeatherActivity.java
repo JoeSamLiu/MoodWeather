@@ -8,7 +8,9 @@ import android.preference.PreferenceManager;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -20,6 +22,7 @@ import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.moodweather.android.gson.Forecast;
 import com.moodweather.android.gson.Weather;
+import com.moodweather.android.util.CacheUtil;
 import com.moodweather.android.util.HttpUtil;
 import com.moodweather.android.util.LogUtil;
 import com.moodweather.android.util.Utility;
@@ -34,64 +37,137 @@ import okhttp3.Response;
  * Created by THOMASLEWIS on 2017/10/1.
  */
 
-public class WeatherActivity extends BasicActivity {
+public class WeatherActivity extends BasicActivity{
     private ScrollView weatherLayout;
-    /**
-     * 用于显示城市名
-     */
-    private TextView titleCity;
-    /**
-     * 用于显示发布时间
-     */
-    private TextView titleUpdateTime;
-
+    private TextView titleCity;//用于显示城市名
+    private TextView titleUpdateTime;//用于显示发布时间
     private TextView degreeText;
-
     private TextView weatherInfoText;
-
     private LinearLayout forecastLayout;
-    /**
-     * 用于显示空气质量
-     */
-    private TextView aqiText;
-    /**
-     * 用于显示空气酸碱性
-     */
-    private TextView pm25Text;
-    /**
-     * 用于显示舒适度
-     */
-    private TextView comfortText;
-    /**
-     * 用于显示是否适宜洗车
-     */
-    private TextView carWashText;
-    /**
-     * 用于显示是否合适运动
-     */
-    private TextView sportText;
-    /**
-     * 用于显示动态背景
-     */
-    private ImageView bingPicImg;
-    /**
-     * 用于下拉更新
-     */
-    public SwipeRefreshLayout swipeRefreshLayout;
-    /**
-     * 用于滑出菜单的布局
-     */
-    public DrawerLayout drawerLayout;
-    /**
-     * 用于弹出菜单的按钮
-     */
-    private Button navButton;
-    public static final String TAG = "WeatherActivity" ;
+    private TextView aqiText;//用于显示空气质量
+    private TextView pm25Text;//用于显示空气酸碱性
+    private TextView comfortText;//用于显示舒适度
+    private TextView carWashText;//用于显示是否适宜洗车
+    private TextView sportText;//用于显示是否合适运动
+    private ImageView bingPicImg;//用于显示动态背景图片
+    public SwipeRefreshLayout swipeRefreshLayout;//用于下拉更新
+    public DrawerLayout drawerLayout;//用于滑出菜单的布局
+    private Button navButton;//用于弹出菜单的按钮
     String weatherId;
+    private LinearLayout weatherTouch;
+    public static final String TAG = "WeatherActivity" ;
+    private boolean isFirst;
 
     @Override
-    public void onCreate( Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setStatusBarVisibility();//设置状态栏属性
+        setContentView(R.layout.activity_weather);
+        initComponent();//初始化各控件
+        getSystemCache();//获取缓存
+        swipeUpdate();//下拉刷新
+        showMenuFromSide();//弹出菜单
+    }
+
+    /**
+     * 滑动弹出菜单列表
+     */
+    private void showMenuFromSide() {
+        //屏幕触屏滑动监听
+        weatherTouch.setOnTouchListener(new View.OnTouchListener() {
+
+            public float mCurPosY;
+            public float mCurPosX;
+            public float mPosX;
+            public float mPosY;
+
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                // TODO Auto-generated method stub
+                switch (event.getAction()) {
+                    //单点触摸按下动作
+                    case MotionEvent.ACTION_DOWN:
+                        mPosX = event.getX();
+                        mPosY = event.getY();
+                        break;
+                    //单点你触摸移动动作
+                    case MotionEvent.ACTION_MOVE:
+                        mCurPosX = event.getX();
+                        mCurPosY = event.getY();
+                        break;
+                    //单点触摸离开动作
+                    case MotionEvent.ACTION_UP:
+                        if (mCurPosX - mPosX < 0
+                                && (Math.abs(mCurPosX - mPosX) > 50)) {
+                            //向左滑动
+
+                        } else if (mCurPosX - mPosX > 0
+                                && (Math.abs(mCurPosX - mPosX) > 100)) {
+                            //向右滑动
+                            drawerLayout.openDrawer(GravityCompat.START);//滑出菜单
+                        }
+                        //                        else if (mCurPosY - mPosY < 0
+                        //                                && (Math.abs(mCurPosY - mPosY)) > 250){
+                        //                            //向上滑动
+                        //                        }else if (mCurPosY - mPosY > 0
+                        //                                && (Math.abs(mCurPosY - mPosY)) > 250){
+                        //                            //向下滑动
+                        //                        }
+                        break;
+                }
+                return true;
+            }
+        });
+        LogUtil.i(TAG,"右滑滑出菜单已经启动！");
+    }
+
+    /**
+     * 下拉更新天气和背景
+     */
+    private void swipeUpdate() {
+        swipeRefreshLayout.setOnRefreshListener(() -> {
+            LogUtil.i(TAG,"刷新时的weatherId 是 "+weatherId);
+            requestWeather(weatherId);
+        });
+        LogUtil.i(TAG,"已（下拉）更新完毕！");
+    }
+
+    /**
+     * 判断缓存并作出处理
+     */
+    public void getSystemCache() {
+        CacheUtil cacheUtil = new CacheUtil();
+        String weatherSting = cacheUtil.getCache(this,"weather");
+        final String weatherId;
+        if (weatherSting != null){
+            //有缓存时直接解析天气数据
+            Weather weather = Utility.handleWeatherResponse(weatherSting);
+            weatherId = weather.basic.weatherId;
+            showWeatherInfo(weather);
+            this.weatherId = weatherId;
+            LogUtil.i("WeatherActivity","读取了缓存时的weatherId 是 "+weatherId);
+        }else {
+            //无缓存时直接去服务器查询天气
+            weatherId = getIntent().getStringExtra("weather_id");
+            weatherLayout.setVisibility(View.INVISIBLE);
+            requestWeather(weatherId);
+            this.weatherId = weatherId;
+            LogUtil.i("WeatherActivity","直接去服务器时的weatherId 是 "+this.weatherId);
+        }
+        String bingPic = cacheUtil.getCache(this , "bing_pic");
+        if (bingPic != null){
+            //有缓存直接读取背景
+            Glide.with(this).load(bingPic).into(bingPicImg);
+        }else {
+            //无缓存直接去服务器加载
+            loadBingPic();
+        }
+    }
+
+    /**
+     * 设置状态栏
+     */
+    private void setStatusBarVisibility() {
         if (Build.VERSION.SDK_INT >= 21 ){
             View decorView = getWindow().getDecorView();
             //活动的布局显示在状态栏上
@@ -101,8 +177,13 @@ public class WeatherActivity extends BasicActivity {
             //将状态栏设置成透明的
             getWindow().setStatusBarColor(Color.TRANSPARENT);
         }
-        setContentView(R.layout.activity_weather);
-        //初始化各控件
+        LogUtil.i("WeatherActivity","天气状态栏已设置为透明!");
+    }
+
+    /**
+     * 初始化各控件
+     */
+    private void initComponent() {
         bingPicImg = (ImageView)findViewById(R.id.bing_pic_img);
         weatherLayout = (ScrollView)findViewById(R.id.weather_layout);
         titleCity = (TextView)findViewById(R.id.title_city);
@@ -118,38 +199,10 @@ public class WeatherActivity extends BasicActivity {
         swipeRefreshLayout = (SwipeRefreshLayout)findViewById(R.id.swipe_refresh);
         swipeRefreshLayout.setColorSchemeResources(R.color.colorPrimary);//设置下拉进度条的颜色
         drawerLayout = (DrawerLayout)findViewById(R.id.drawer_layout);
-        navButton = (Button)findViewById(R.id.nav_button);
+        weatherTouch = (LinearLayout)findViewById(R.id.weather_touch);
+        navButton = (Button)findViewById(R.id.nav_button);//导航按钮，弹出侧面菜单
         navButton.setOnClickListener(view -> drawerLayout.openDrawer(GravityCompat.START));
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        String weatherSting = sharedPreferences.getString("weather", null);
-        if (weatherSting != null){
-            //有缓存时直接解析天气数据
-            Weather weather = Utility.handleWeatherResponse(weatherSting);
-            weatherId = weather.basic.weatherId;
-            LogUtil.i(TAG,"天气活动中判断有缓存时，weatherId被赋值，赋值后的值为"+weatherId);
-            showWeatherInfo(weather);
-        }else {
-            //无缓存时直接去服务器查询天气
-            weatherId = getIntent().getStringExtra("weather_id");
-            LogUtil.i(TAG,"天气活动中判断无缓存时，weatherId接收碎片返回的的值为 "+weatherId);
-            weatherLayout.setVisibility(View.INVISIBLE);
-            requestWeather(weatherId);
-        }
-        swipeRefreshLayout.setOnRefreshListener(() -> {
-            LogUtil.i(TAG,"执行刷新操作时的weatherId是 "+weatherId);
-//            String cWeatherId = getIntent().getStringExtra("weather_id");
-//            LogUtil.i(TAG,"天气活动中判断无缓存时，weatherId接收碎片返回的的值为 "+cWeatherId);
-            requestWeather(weatherId);
-            LogUtil.i(TAG,"完成刷新操作后的weatherId是 "+weatherId);
-        });
-        String bingPic = sharedPreferences.getString("bing_pic",null);
-        if (bingPic != null){
-            //有缓存直接读取背景
-            Glide.with(this).load(bingPic).into(bingPicImg);
-        }else {
-            //无缓存直接去服务器加载
-            loadBingPic();
-        }
+        LogUtil.i("WeatherActivity","各组件已经初始化！");
     }
 
     /**
@@ -182,7 +235,7 @@ public class WeatherActivity extends BasicActivity {
     public void requestWeather(String weatherId) {
         String weatherUrl = "http://guolin.tech/api/weather?cityid="+weatherId
                 +"&key=9bff2107c1bd4be8b5ba7224ea82d82f";
-        LogUtil.i(TAG,"天气活动请求的天气地址weatherUrl 为 "+weatherUrl+"\n此时的weatherId is "+weatherId);
+        Log.d("WeatherActivity","天气活动的weatherUrl是 "+weatherUrl+"\n天气活动的weatherId是 "+weatherId);
         this.weatherId = weatherId;
         HttpUtil.sendOkHttpRequest(weatherUrl, new Callback() {
             @Override
@@ -240,8 +293,8 @@ public class WeatherActivity extends BasicActivity {
                 TextView minText = view.findViewById(R.id.min_text);
                 dateText.setText(forecast.date);
                 infoText.setText(forecast.more.info);
-                maxText.setText(forecast.temperature.max);
-                minText.setText(forecast.temperature.min);
+                maxText.setText(forecast.temperature.max+"°C");
+                minText.setText(forecast.temperature.min+"°C");
                 forecastLayout.addView(view);
             }
             if (weather.aqi != null) {
@@ -256,8 +309,9 @@ public class WeatherActivity extends BasicActivity {
             sportText.setText(sport);
             weatherLayout.setVisibility(View.VISIBLE);//请求数据时应该隐藏ScrollView，不然空数据界面不好看。
             //启动后台更新服务
-//            Intent intent = new Intent(this , AutoUpdateService.class);
-//            startService(intent);
+            //            Intent intent = new Intent(this , AutoUpdateService.class);
+            //            startService(intent);
+            //            LogUtil.i("WeatherActivity","开启后台更新服务!");
         }else {
             Toast.makeText(WeatherActivity.this , "获取天气信息失败！" , Toast.LENGTH_SHORT).show();
         }

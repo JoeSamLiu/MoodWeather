@@ -37,11 +37,9 @@ public class ChooseAreaFragment extends Fragment {
 
     private ProgressDialog progressDialog;
     private TextView titleText;
-//    private Button backButton;
     private ListView listView;
     private ArrayAdapter<String> adapter;
     private List<String> dataList = new ArrayList<String>();
-    public static final String TAG = "ChooserAreaFragment" ;
     /**
      * 省列表
      */
@@ -73,15 +71,13 @@ public class ChooseAreaFragment extends Fragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.choose_area, container, false);
         titleText = view.findViewById(R.id.text_title);
-//        backButton = (Button) view.findViewById(R.id.backup_button);
         listView = view.findViewById(R.id.list_view);
         adapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_list_item_1, dataList);
         listView.setAdapter(adapter);
         return view;
     }
-
     /**
-     * 给listView 和 button 设置点击事件
+     * 给listView设置点击事件
      * @param savedInstanceState
      */
     @Override
@@ -91,41 +87,34 @@ public class ChooseAreaFragment extends Fragment {
             if (currentLevel == LEVEL_PROVINCE) {
                 selectedProvince = provinceList.get(position);
                 queryCities();
-                LogUtil.i(TAG,"选择了城市！\n城市id为"+selectedProvince.getId());
+                LogUtil.i("ChooseAreaFragment","选择了城市！\n城市id为"+selectedProvince.getId());
             } else if (currentLevel == LEVEL_CITY) {
                 selectedCity = cityList.get(position);
                 queryCounties();
-                LogUtil.i(TAG,"选择了县城！\n县城id为"+selectedProvince.getId());
+                LogUtil.i("ChooseAreaFragment","选择了县城！\n县城id为"+selectedProvince.getId());
             }
             //从省市县列表界面跳转至天气界面
             else if(currentLevel == LEVEL_COUNTY){
                 String weatherId = countyList.get(position).getWeatherId();
-                LogUtil.i(TAG , "跳转天气界面前，weatherId = "+ weatherId);
-                if (getActivity()instanceof  MainActivity) {//在main中，处理逻辑不变
-                    LogUtil.i(TAG , "碎片属于MainActivity的实例，此时 weatherId = "+ weatherId);
+                LogUtil.i("ChooseAreaFragment","跳转到天气界面前，weatherId 是 "+weatherId);
+                /**
+                 * 判断碎片位置
+                 */
+                if (getActivity()instanceof  MainActivity) {
                     Intent intent = new Intent(getActivity(), WeatherActivity.class);
                     intent.putExtra("weather_id", weatherId);
                     startActivity(intent);
                     getActivity().finish();
-                }else if (getActivity()instanceof WeatherActivity){//在weather 中，关闭滑出菜单
-                    LogUtil.i(TAG , "碎片属于WeatherActivity的实例，此时 weatherId = "+ weatherId);
+                    LogUtil.i("ChooseAreaFragment","碎片在MainActivity中时，weatherId 是 "+weatherId);
+                }else if (getActivity()instanceof WeatherActivity){
                     WeatherActivity activity = (WeatherActivity) getActivity();
                     activity.drawerLayout.closeDrawers();
                     activity.swipeRefreshLayout.setRefreshing(true);
                     activity.requestWeather(weatherId);
+                    LogUtil.i("ChooseAreaFragment","碎片在WeatherActivity中时，weatherId 是 "+weatherId);
                 }
             }
         });
-//        backButton.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                if (currentLevel == LEVEL_COUNTY) {
-//                    queryCities();
-//                } else if (currentLevel == LEVEL_CITY) {
-//                    queryProvinces();
-//                }
-//            }
-//        });
         queryProvinces();//加载省级数据
     }
     /**
@@ -133,7 +122,6 @@ public class ChooseAreaFragment extends Fragment {
      */
     private void queryProvinces() {
         titleText.setText("中国/China");
-//        backButton.setVisibility(View.GONE);
         provinceList = DataSupport.findAll(Province.class);
         if (provinceList.size() > 0) {
             dataList.clear();
@@ -153,7 +141,6 @@ public class ChooseAreaFragment extends Fragment {
      */
     private void queryCities() {
         titleText.setText(selectedProvince.getProvinceName());
-//        backButton.setVisibility(View.VISIBLE);
         cityList = DataSupport.where("provinceid = ? ",
                 String.valueOf(selectedProvince.getId())).find(City.class);
         if (cityList.size() > 0) {
@@ -175,7 +162,6 @@ public class ChooseAreaFragment extends Fragment {
      */
     private void queryCounties() {
         titleText.setText(selectedCity.getCityName());
-//        backButton.setVisibility(View.VISIBLE);
         countyList = DataSupport.where("cityid = ? ",
                 String.valueOf(selectedCity.getId())).find(County.class);
         if (countyList.size() > 0) {

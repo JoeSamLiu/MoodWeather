@@ -8,9 +8,9 @@ import android.content.SharedPreferences;
 import android.os.IBinder;
 import android.os.SystemClock;
 import android.preference.PreferenceManager;
-import android.util.Log;
 
 import com.moodweather.android.gson.Weather;
+import com.moodweather.android.util.CacheUtil;
 import com.moodweather.android.util.HttpUtil;
 import com.moodweather.android.util.LogUtil;
 import com.moodweather.android.util.Utility;
@@ -22,7 +22,7 @@ import okhttp3.Callback;
 import okhttp3.Response;
 
 public class AutoUpdateService extends Service {
-    public static final String TAG = "AutoUpdateService" ;
+
     @Override
     public IBinder onBind(Intent intent) {
         // TODO: Return the communication channel to the service.
@@ -31,7 +31,6 @@ public class AutoUpdateService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        LogUtil.i(TAG,"后台服务启动了，而且是私自启动！！");
         updateWeather();
         updateBingPic();
         AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
@@ -48,15 +47,14 @@ public class AutoUpdateService extends Service {
      * 更新天气信息
      */
     private void updateWeather() {
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        String weatherSting = sharedPreferences.getString("weather", null);
+        String weatherSting = new CacheUtil().getCache(this , "weather");
         if (weatherSting != null) {
             //有缓存时直接解析天气数据
             Weather weather = Utility.handleWeatherResponse(weatherSting);
             String weatherId = weather.basic.weatherId;
             String weatherUrl = "http://guolin.tech/api/weather?cityid="+weatherId
                     +"&key=9bff2107c1bd4be8b5ba7224ea82d82f";
-            Log.d("WeatherActivity","AutoUpdateServices' weatherUrl is "+weatherUrl+"\nweatherId is "+weatherId);
+            LogUtil.i("WeatherActivity","后台自动更新服务已启动！\nweatherUrl 是 "+weatherUrl+"\nweatherId 是 "+weatherId);
             HttpUtil.sendOkHttpRequest(weatherUrl, new Callback() {
                 @Override
                 public void onFailure(Call call, IOException e) {
