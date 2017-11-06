@@ -14,24 +14,43 @@
             android:id="@+id/tool_view"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            android:background="?attr/colorPrimary"
-            android:visibility="gone">
-            <include layout="@layout/title_text"/>
+            android:background="?attr/colorPrimary">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="horizontal">
+                <include layout="@layout/title_text"/>
+            </LinearLayout>
         </android.support.v7.widget.Toolbar>
     <android.support.design.widget.NavigationView
         android:id="@+id/nav_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:headerLayout="@layout/nav_header"
-        android:background="#0000"
-        android:visibility="gone">
+        android:background="#0000">
         <include layout="@layout/title_text"/>
     </android.support.design.widget.NavigationView>
     </FrameLayout>
-    <ListView
-        android:id="@+id/list_view"
+    <android.support.design.widget.CoordinatorLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="#fff"/>
-
+        android:layout_height="match_parent">
+        <ListView
+            android:id="@+id/list_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="#fff"/>
+        <LinearLayout
+            android:id="@+id/fab_container"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|end"
+            android:layout_margin="28dp">
+            <android.support.design.widget.FloatingActionButton
+                android:id="@+id/listView_fab"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:src="@drawable/ic_tool_bar_back"
+                android:elevation="8dp"/>
+        </LinearLayout>
+    </android.support.design.widget.CoordinatorLayout>
 </LinearLayout>

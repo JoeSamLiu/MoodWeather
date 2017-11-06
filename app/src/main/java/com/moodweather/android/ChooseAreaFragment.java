@@ -5,13 +5,15 @@ import android.app.ProgressDialog;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
+import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -33,7 +35,7 @@ import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Response;
 
-public class ChooseAreaFragment extends Fragment {
+public class ChooseAreaFragment extends Fragment{
     public static final int LEVEL_PROVINCE = 0;
     public static final int LEVEL_CITY = 1;
     public static final int LEVEL_COUNTY = 2;
@@ -69,6 +71,9 @@ public class ChooseAreaFragment extends Fragment {
     private int currentLevel;
     private NavigationView navView;
     private Toolbar toolView;
+    private Button toolbar_back;
+    private FloatingActionButton listView_fab;
+    private LinearLayout fab_container;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -79,6 +84,8 @@ public class ChooseAreaFragment extends Fragment {
         navView = view.findViewById(R.id.nav_view);
         titleText = view.findViewById(R.id.text_title);
         listView = view.findViewById(R.id.list_view);
+        listView_fab = view.findViewById(R.id.listView_fab);
+        fab_container = view.findViewById(R.id.fab_container);
         judgeFragment();//判断碎片位置
         adapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_list_item_1, dataList);
         listView.setAdapter(adapter);
@@ -91,7 +98,7 @@ public class ChooseAreaFragment extends Fragment {
         /**
          * 判断碎片位置
          */
-        if (getActivity()instanceof  MainActivity) {
+        if (getActivity() instanceof  MainActivity) {
             navView.setVisibility(View.GONE);
             toolView.setVisibility(View.VISIBLE);
             titleText.setHint("请选择城市");
@@ -109,7 +116,7 @@ public class ChooseAreaFragment extends Fragment {
      * @param savedInstanceState
      */
     @Override
-    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+    public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         listView.setOnItemClickListener((parent, view, position, id) -> {
             if (currentLevel == LEVEL_PROVINCE) {
@@ -143,13 +150,29 @@ public class ChooseAreaFragment extends Fragment {
                 }
             }
         });
+        back();//返回上一城市查询页面
         queryProvinces();//加载省级数据
     }
+
+    /**
+     * 返回上一城市查询页面
+     */
+    private void back() {
+        listView_fab.setOnClickListener(view -> {
+            if (currentLevel == LEVEL_COUNTY){
+                queryCities();
+            }else if (currentLevel == LEVEL_CITY){
+                queryProvinces();
+            }
+        });
+    }
+
     /**
      * 查询全国的省份，优先从数据库查询，再到服务器。
      */
     private void queryProvinces() {
         titleText.setText("中国/China");
+        listView_fab.setVisibility(View.GONE);
         provinceList = DataSupport.findAll(Province.class);
         if (provinceList.size() > 0) {
             dataList.clear();
@@ -169,6 +192,7 @@ public class ChooseAreaFragment extends Fragment {
      */
     private void queryCities() {
         titleText.setText(selectedProvince.getProvinceName());
+        listView_fab.setVisibility(View.VISIBLE);
         cityList = DataSupport.where("provinceid = ? ",
                 String.valueOf(selectedProvince.getId())).find(City.class);
         if (cityList.size() > 0) {
@@ -190,6 +214,7 @@ public class ChooseAreaFragment extends Fragment {
      */
     private void queryCounties() {
         titleText.setText(selectedCity.getCityName());
+        listView_fab.setVisibility(View.VISIBLE);
         countyList = DataSupport.where("cityid = ? ",
                 String.valueOf(selectedCity.getId())).find(County.class);
         if (countyList.size() > 0) {
