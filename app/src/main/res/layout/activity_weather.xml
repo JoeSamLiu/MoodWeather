@@ -9,6 +9,14 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:scaleType="centerCrop"/>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_weight="1"
+            android:layout_height="match_parent">
     <!--加入滑动菜单功能-->
     <android.support.v4.widget.DrawerLayout
         android:id="@+id/drawer_layout"
@@ -48,12 +56,50 @@
             android:name="com.moodweather.android.ChooseAreaFragment"
             android:layout_gravity="start"/>
     </android.support.v4.widget.DrawerLayout>
-    <TextView
-        android:id="@+id/title_update_time"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="0dp"
-        android:textColor="#fff"
-        android:textSize="16sp"
-        android:text="00:00"/>
+            </LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="20"
+            android:orientation="vertical">
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#f0f"/>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="horizontal"
+                android:background="#0000">
+                <TextView
+                    android:id="@+id/location_data"
+                    android:layout_width="0dp"
+                    android:layout_weight="6"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:textColor="#0dd"
+                    android:textStyle="italic|bold"
+                    android:textSize="10sp"
+                    android:clickable="true"/>
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_weight="1.2"
+                    android:layout_height="wrap_content"
+                    android:gravity="left"
+                    android:layout_gravity="center"
+                    android:textColor="#fff"
+                    android:textSize="10sp"
+                    android:text="更新时间："/>
+                <TextView
+                    android:id="@+id/title_update_time"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:gravity="left"
+                    android:layout_gravity="center_vertical"
+                    android:textColor="#fff"
+                    android:textSize="10sp"/>
+            </LinearLayout>
+        </LinearLayout>
+    </LinearLayout>
 </FrameLayout>

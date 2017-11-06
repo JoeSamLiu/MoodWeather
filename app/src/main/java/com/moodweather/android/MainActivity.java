@@ -1,126 +1,73 @@
 package com.moodweather.android;
 
-import android.Manifest;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.support.v4.app.ActivityCompat;
-import android.widget.Toast;
 
-import com.baidu.location.BDLocation;
-import com.baidu.location.BDLocationListener;
-import com.baidu.location.LocationClient;
 import com.moodweather.android.introduce.CenterActivity;
+import com.moodweather.android.util.AssistUtil;
 import com.moodweather.android.util.LogUtil;
 
-import java.util.ArrayList;
-import java.util.List;
-
-public class MainActivity extends BasicActivity {
-    public LocationClient locationClient;
-    private List<String> permissionList = new ArrayList<>();
+public class MainActivity extends BasicActivity{
     public static final String TAG = "MainActivity" ;
-    private boolean isFirst ;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        judgeFirst(isFirst);//判断是否为第一次运行
+        judgeFirst();//判断是否为第一次运行
     }
+
     /**
      * 判断是否为第一次运行程序
-     * @param isFirst
      */
-    private void judgeFirst(boolean isFirst) {
-        if (!isFirst){
+    private void judgeFirst() {
+        if (new AssistUtil().Judge()){
             LogUtil.i(TAG,"第一次执行程序");
+            initialization();//初始化
             Intent intent = new Intent(this , CenterActivity.class);
             startActivity(intent);
-            initialization();//初始化
-            askForPermission();//询问权限
-            this.isFirst = true;
-            LogUtil.i(TAG,"第一次执行完程序后，isFirst 的值是 " +isFirst);
         }else {
-            LogUtil.i(TAG,"非第一次执行程序");
+            LogUtil.i(TAG,"并非第一次执行程序");
             initialization();//初始化
-            askForPermission();//询问权限
         }
     }
     /**
      * 初始化
      */
     private void initialization() {
-        locationClient = new LocationClient(getApplicationContext());
-        locationClient.registerLocationListener(new MyLocationClickListener());
-    }
-    /**
-     * 询问权限
-     */
-    private void askForPermission() {
-        if (ActivityCompat.checkSelfPermission(MainActivity.this, Manifest
-                .permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            permissionList.add(Manifest.permission.ACCESS_FINE_LOCATION);
-        }
-        if (ActivityCompat.checkSelfPermission(MainActivity.this, Manifest
-                .permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
-            permissionList.add(Manifest.permission.READ_PHONE_STATE);
-        }
-        if (ActivityCompat.checkSelfPermission(MainActivity.this, Manifest
-                .permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-            permissionList.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
-        }
-        if (!permissionList.isEmpty()) {
-            String[] permissions = permissionList.toArray(new String[permissionList.size()]);
-            ActivityCompat.requestPermissions(MainActivity.this, permissions, 1);
-        } else {
-            requestLocation();
-        }
-    }
-    /**
-     * 启动定位客户端
-     */
-    private void requestLocation() {
-        locationClient.start();
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode,String[] permissions, int[] grantResults) {
-        switch (requestCode){
-            case 1:
-                if (grantResults.length > 0){
-                    for (int result : grantResults){
-                        if (result != PackageManager.PERMISSION_GRANTED){
-                            Toast.makeText(MainActivity.this ,
-                                    "权限获取不完全无法使用本程序" , Toast.LENGTH_SHORT).show();
-                            finish();
-                            return;
-                        }
-                    }
-                    requestLocation();
-                }else {
-                    Toast.makeText(MainActivity.this ,
-                            "未知错误" , Toast.LENGTH_SHORT).show();
-                }
-                break;
-            default:
-        }
-    }
-
-    private class MyLocationClickListener implements BDLocationListener {
-        @Override
-        public void onReceiveLocation(BDLocation location) {
-            StringBuilder currentPosition = new StringBuilder();
-            currentPosition.append("纬度： ").append(location.getLatitude()).append("\n");
-            currentPosition.append("经度： ").append(location.getLongitude()).append("\n");
-            currentPosition.append("定位方式： ");
-            if (location.getLocType() == BDLocation.TypeGpsLocation){
-                currentPosition.append("GPS");
-            }else if (location.getLocType() == BDLocation.TypeNetWorkException){
-                currentPosition.append("网络");
-            }
-            LogUtil.i("MainActivity" , "当前位置经纬度： "+currentPosition);
-            LogUtil.i("MainActivity" , "location.getLocType() is "+location.getLocType());
-            Toast.makeText(MainActivity.this , location.getLocType() ,Toast.LENGTH_SHORT).show();
-        }
     }
 }
+/*
+public int getLocType ( )
+
+返回值：
+
+61 ： GPS定位结果，GPS定位成功。
+
+62 ： 无法获取有效定位依据，定位失败，请检查运营商网络或者wifi网络是否正常开启，尝试重新请求定位。
+
+63 ： 网络异常，没有成功向服务器发起请求，请确认当前测试手机网络是否通畅，尝试重新请求定位。
+
+65 ： 定位缓存的结果。
+
+66 ： 离线定位结果。通过requestOfflineLocaiton调用时对应的返回结果。
+
+67 ： 离线定位失败。通过requestOfflineLocaiton调用时对应的返回结果。
+
+68 ： 网络连接失败时，查找本地离线定位时对应的返回结果。
+
+161： 网络定位结果，网络定位定位成功。
+
+162： 请求串密文解析失败。
+
+167： 服务端定位失败，请您检查是否禁用获取位置信息权限，尝试重新请求定位。
+
+502： key参数错误，请按照说明文档重新申请KEY。
+
+505： key不存在或者非法，请按照说明文档重新申请KEY。
+
+601： key服务被开发者自己禁用，请按照说明文档重新申请KEY。
+
+602： key mcode不匹配，您的ak配置过程中安全码设置有问题，请确保：sha1正确，“;”分号是英文状态；且包名是您当前运行应用的包名，请按照说明文档重新申请KEY。
+
+501～700：key验证失败，请按照说明文档重新申请KEY。
+*/

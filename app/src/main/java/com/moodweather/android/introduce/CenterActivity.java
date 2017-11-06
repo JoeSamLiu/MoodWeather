@@ -45,13 +45,13 @@ public class CenterActivity extends AppCompatActivity {
             View v = llContainer.getChildAt(i);
             ViewPropertyAnimatorCompat viewAnimator;
             // TextView控件, Button是TextView的子类
-            if (!(v instanceof Button)) {
+            if (i < 2) {
                 // 渐变动画，从消失到显示
                 viewAnimator = ViewCompat.animate(v)
                         .translationY(50).alpha(1)
                         .setStartDelay((ITEM_DELAY * i) + 500)
                         .setDuration(ANIM_ITEM_DURATION);
-            } else { // Button控件, 从缩小到扩大
+            } else { //后两个控件, 从缩小到扩大
                 viewAnimator = ViewCompat.animate(v)
                         .scaleY(1).scaleX(1)
                         .setStartDelay((ITEM_DELAY * i) + 500)
@@ -59,6 +59,9 @@ public class CenterActivity extends AppCompatActivity {
             }
             viewAnimator.setInterpolator(new DecelerateInterpolator()).start();
         }
-        bChoice2.setOnClickListener(v -> onBackPressed());
+        bChoice2.setOnClickListener(v -> {
+            //onBackPressed();
+            this.finish();
+        });
     }
 }

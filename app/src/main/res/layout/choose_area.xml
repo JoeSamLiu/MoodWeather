@@ -6,21 +6,28 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:background="#0000">
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#0000">
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/tool_view"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="?attr/colorPrimary"
+            android:visibility="gone">
+            <include layout="@layout/title_text"/>
+        </android.support.v7.widget.Toolbar>
     <android.support.design.widget.NavigationView
+        android:id="@+id/nav_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:headerLayout="@layout/nav_header"
-        android:background="#0000">
-        <TextView
-            android:id="@+id/text_title"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            android:textColor="#fff"
-            android:textSize="20sp"
-            android:background="#0000"
-            android:gravity="center"/>
+        android:background="#0000"
+        android:visibility="gone">
+        <include layout="@layout/title_text"/>
     </android.support.design.widget.NavigationView>
+    </FrameLayout>
     <ListView
         android:id="@+id/list_view"
         android:layout_width="match_parent"

@@ -34,7 +34,7 @@
         <!-- 百度?? -->
         <meta-data
             android:name="com.baidu.lbsapi.API_KEY"
-            android:value="2Lkt8WB0hDqIp6Mp5UQPI28xHHznEiy4"/>
+            android:value="w8EMmkcSQlGm6cxSMn7BrHkZ60NuMz65"/>
 
         <activity android:name=".MainActivity">
             <intent-filter>
@@ -43,20 +43,19 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
+        <activity android:name=".BasicActivity"/>
         <activity
             android:name=".WeatherActivity"
             android:label="@string/title_activity_weather"
             android:theme="@style/AppTheme">
         </activity>
-
         <activity android:name=".introduce.CenterActivity"/>
-        <activity android:name=".BasicActivity"/>
+        <activity android:name=".location.GetLocationActivity"/>
         <service android:name=".service.AutoUpdateService"/>
         <service
             android:name="com.baidu.location.f"
             android:enabled="true"
             android:process=":remote"/>
-
     </application>
 
 </manifest>

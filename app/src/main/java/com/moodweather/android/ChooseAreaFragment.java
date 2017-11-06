@@ -3,8 +3,11 @@ package com.moodweather.android;
 import android.app.Fragment;
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.design.widget.NavigationView;
+import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -64,18 +67,43 @@ public class ChooseAreaFragment extends Fragment {
      * 当前选中的级别
      */
     private int currentLevel;
+    private NavigationView navView;
+    private Toolbar toolView;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.choose_area, container, false);
+        toolView = view.findViewById(R.id.tool_view);
+        navView = view.findViewById(R.id.nav_view);
         titleText = view.findViewById(R.id.text_title);
         listView = view.findViewById(R.id.list_view);
+        judgeFragment();//判断碎片位置
         adapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_list_item_1, dataList);
         listView.setAdapter(adapter);
         return view;
     }
+    /**
+     * 判断碎片位置
+     */
+    private void judgeFragment() {
+        /**
+         * 判断碎片位置
+         */
+        if (getActivity()instanceof  MainActivity) {
+            navView.setVisibility(View.GONE);
+            toolView.setVisibility(View.VISIBLE);
+            titleText.setHint("请选择城市");
+            titleText.setHintTextColor(Color.WHITE);
+            LogUtil.i("ChooseAreaFragment","碎片在MainActivity中。");
+        }else if (getActivity()instanceof WeatherActivity){
+            navView.setVisibility(View.VISIBLE);
+            toolView.setVisibility(View.GONE);
+            LogUtil.i("ChooseAreaFragment","碎片在WeatherActivity中。");
+        }
+    }
+
     /**
      * 给listView设置点击事件
      * @param savedInstanceState

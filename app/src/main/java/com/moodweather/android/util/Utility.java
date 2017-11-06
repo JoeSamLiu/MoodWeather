@@ -105,7 +105,7 @@ public class Utility {
             JSONObject jsonObject = new JSONObject(response);
             JSONArray jsonArray = jsonObject.getJSONArray("HeWeather");
             String weatherContent = jsonArray.getJSONObject(0).toString();//??
-            return new Gson().fromJson(weatherContent , Weather.class);
+            return new Gson().fromJson(weatherContent , Weather.class);//把JSON里相应的数据提取出来
         }catch (Exception e){
             e.printStackTrace();
         }
