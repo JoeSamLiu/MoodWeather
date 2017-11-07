@@ -44,13 +44,13 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom|end"
-            android:layout_margin="28dp">
+            android:layout_margin="30dp"
+            android:elevation="5dp">
             <android.support.design.widget.FloatingActionButton
                 android:id="@+id/listView_fab"
                 android:layout_width="50dp"
                 android:layout_height="50dp"
-                android:src="@drawable/ic_tool_bar_back"
-                android:elevation="8dp"/>
+                android:src="@drawable/ic_tool_bar_back"/>
         </LinearLayout>
     </android.support.design.widget.CoordinatorLayout>
 </LinearLayout>
